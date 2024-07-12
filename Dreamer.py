@@ -7,6 +7,7 @@ import pygame as pg
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+
 WIDTH = 1100
 HEIGHT = 650
 
@@ -51,43 +52,38 @@ class Allen(pg.sprite.Sprite):
 
 def main():
     pg.display.set_caption("はばたけ！こうかとん")
-    screen = pg.display.set_mode((800, 600))
+    screen = pg.display.set_mode((1200, 700))
     clock  = pg.time.Clock()
-    back_img = pg.image.load("fig/24535830.jpg") #背景画像
-    
-    allen = Allen()
-    all_sprites = pg.sprite.Group()
-    all_sprites.add(allen)
-
+    beamallen = None
+    #背景画像をロードして、ウインドウのサイズにリサイズ
+    back_img = pg.image.load("fig/24535830.jpg") 
+    back_img = pg.transform.scale(back_img, (1200, 700))
+    allen = Allen((100, 600))
+    show_allen = True
     tmr = 0
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
-                return
-
-        x = tmr%3200
+                pg.quit()
+                sys.exit()
+            elif event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
+                show_allen = not show_allen #アレンの表示非表示の切替(キャラの切り替えで使うかも)
+            if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+                # スペースキー押下でBeamクラスのインスタンス生成
+                beamallen = BeamAllen(allen)
+        
         screen.blit(back_img, [0, 0]) #背景画像を表すsurfase
        
-        
         key_lst = pg.key.get_pressed()
-        x, y = 0, 0
-        if key_lst[pg.K_UP]:
-            x , y =0 ,-2
-        if key_lst[pg.K_DOWN]:
-            x, y= 0, 2
-        if key_lst[pg.K_RIGHT]:
-            x, y=2, 0
-        if key_lst[pg.K_LEFT]:
-            x, y=-2, 0
-        
-        allen.rect.move_ip(x, y)
-        all_sprites.update()
+        if show_allen:
+            allen.update(key_lst, screen)
+        if beamallen is not None:
+            beamallen.update(screen)
 
-        screen.blit(back_img, (0, 0))
-        all_sprites.draw(screen) 
         pg.display.update()
-        tmr += 1        
         clock.tick(60)
+
+ 
 
 
 if __name__ == "__main__":
